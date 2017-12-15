@@ -1,6 +1,6 @@
 import { AppPage } from './app.po';
 
-describe('media-paradise App', () => {
+describe('media-pradise App', () => {
   let page: AppPage;
 
   beforeEach(() => {
