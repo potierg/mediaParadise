@@ -18,13 +18,21 @@ router.get('/', function(req, res) {
 });
 
 router.get('/japscan/list', function(req, res) {
-    Web.getHTML("http://www.japscan.com/mangas/dragon-ball-super/", function(HTMLcontent) {
+    Web.getHTML("http://www.japscan.com/mangas/one-piece/", function(HTMLcontent) {
         fs.readFile("./Template/JapscanOneManga.html", 'utf8', function (err,FileContent) {
             Scraper.exec(HTMLcontent, FileContent, function(result) {
                 res.json({ message: result });                
             });
         });
     });
+    Web.getHTML("http://www.japscan.com/mangas/07-ghost/", function(HTMLcontent) {
+        fs.readFile("./Template/JapscanOneManga.html", 'utf8', function (err,FileContent) {
+            Scraper.exec(HTMLcontent, FileContent, function(result) {
+                res.json({ message: result });                
+            });
+        });
+    });
+
 });
 
 

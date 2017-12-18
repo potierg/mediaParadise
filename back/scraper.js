@@ -20,10 +20,12 @@ module.exports = class Scraper {
         while (indexFile < file.length && indexHtml < html.length) {
             var lineFile = this.clean_line(file[indexFile]);
             var lineHtml = this.clean_line(html[indexHtml]);
+
+            var no_html = false;
+
             if (lineFile == "{{*}}") {
                 var next_active_range = this.getRangeActive(file, indexFile);
                 var ret_range = this.getRangeMatch(html, indexHtml - 1, next_active_range);
-                console.log(ret_range);
                 if (ret_range != -1) {
                     var end_range = ret_range[0];
                     ret_range[1].forEach(val => {
@@ -33,13 +35,28 @@ module.exports = class Scraper {
                 }
             }
             else if (lineFile.indexOf("{{") != -1 && lineFile.indexOf("}}") != -1) {
-                var ret_arr = this.extractValueLine(lineFile, lineHtml);
-                ret_arr.forEach(val => {
-                    datas.values.push(val);
-                })
+                var ret_arr = this.extractValueLine(lineFile, lineHtml, array_if);
+                if (ret_arr != null) {
+                    ret_arr.forEach(val => {
+                        datas.values.push(val);
+                    });
+                }
             }
+
+            if (lineFile.indexOf("[[") != -1 && lineFile.indexOf("]]") != -1) {
+                var params = lineFile.slice(2, lineFile.length - 2).split("||");
+                
+                var check = 0;
+                if (params[0] == "if")
+                    check = 1;
+
+                if (array_if.indexOf(params[check].slice(1, params[check].length - 1)) == -1)
+                    no_html = true;
+            }
+
+            if (!no_html)
+                indexHtml++;
             indexFile++;
-            indexHtml++;
         }
 
         console.log(array_if);
@@ -47,13 +64,21 @@ module.exports = class Scraper {
         return;
     }
 
-    static extractValueLine(template = "", val = "") {
+    static extractValueLine(template = "", val = "", array_if = []) {
         var array_val = [];
 
         var index = 0;
         var indexHtml = 0;
 
         var loop = 0;
+        
+        if (template.indexOf("[[") !== -1 && template.indexOf("]]") !== -1) {
+            let params = template.slice(2, template.length - 2).split("||");
+            if (array_if.indexOf(params[0].slice(1, params[0].length - 1)) === -1)
+                return null;
+            template = params[1];
+        }
+
         while (template.slice(index).indexOf("{{") !== -1) {
 
             var new_line = template.slice(index);
@@ -90,22 +115,24 @@ module.exports = class Scraper {
     }
 
     static getRangeMatch(file, start = 0, match_part = []) {
-        for (var index = start; index < file.length; index++)
+        for (var index = start; index < file.length; index++) {
             var tmp_array_if = [];
-        for (var index2 = 0; index2 < match_part.length; index2++) {
-            var check_line = this.clean_line(match_part[index2]);
-            if (check_line.indexOf("[[") !== -1 && check_line.indexOf("]]") !== -1) {
-                var tmp_line = check_line.slice(2, check_line.length - 2);
-                var params = tmp_line.split("||");
-                if (params[0] == "if" && params[2] == this.clean_line(file[index + index2]) && (!tmp_array_if || tmp_array_if.indexOf(params[1] === -1)))
-                    tmp_array_if.push(params[1]);
+            for (var index2 = 0; index2 < match_part.length; index2++) {
+                var check_line = this.clean_line(match_part[index2]);
+                if (check_line.indexOf("[[") !== -1 && check_line.indexOf("]]") !== -1) {
+                    var tmp_line = check_line.slice(2, check_line.length - 2);
+                    var params = tmp_line.split("||");
+                    if (params[0] == "if" && params[2] == this.clean_line(file[index + index2]) && (!tmp_array_if || tmp_array_if.indexOf(params[1] === -1)))
+                        tmp_array_if.push(params[1].slice(1, params[1].length - 1));
+                }
+                else {
+                    if (check_line != this.clean_line(file[index + index2])) {
+                        break;
+                    }
+                }
+                if (index2 == match_part.length - 1)
+                    return ([index, tmp_array_if]);
             }
-            else {
-                if (check_line != this.clean_line(file[index + index2]))
-                    break;
-            }
-            if (index2 == match_part.length - 1)
-                return ([index, tmp_array_if]);
         }
         return (- 1);
     }

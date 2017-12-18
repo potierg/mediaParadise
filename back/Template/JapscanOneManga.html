@@ -1,47 +1,51 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
-{{*}}
+    {{*}}
 </head>
+
 <body>
-<nav id="menu">
-<ul>
-{{*}}
-</ul>
-</nav>
-<div class="grid">
-<div class="col-2-3">
-<div class="content">
-{{*}}
-<div class="table">
-<div class="thead">
-<div class="cell">Auteur</div>
-[[if||($na)||<div class="cell">Nom Alternatif</div>]]
-<div class="cell">Sortie Initial</div>
-<div class="cell">Genre</div>
-<div class="cell">Fansubs</div>
-<div class="cell">Statut</div>
-</div>
-<div class="row">
-<div class="cell">{{auteur}}</div>
-[[$na||<div class="cell">{{na}}</div>]]
-<div class="cell">{{annee}}</div>
-<div class="cell">{{type}}</div>
-{{*}}
-</div>
-</div>
-<h2 class="bg-header">Synopsis</h2>
-<div id="synopsis">
-{{synopsis}}</div>
-<h2 class="bg-header">Liste Des Chapitres</h2>
-<div id="liste_chapitres">
-{{*}}
-</div>
-</div>
-</div>
-{{*}}
-</div>
-</div>
-{{*}}
+    <nav id="menu">
+        <ul>
+            {{*}}
+        </ul>
+    </nav>
+    <div class="grid">
+        <div class="col-2-3">
+            <div class="content">
+                {{*}}
+                <div class="table">
+                    <div class="thead">
+                        <div class="cell">Auteur</div>
+                        [[if||($na)||<div class="cell">Nom Alternatif</div>]]
+                        <div class="cell">Sortie Initial</div>
+                        <div class="cell">Genre</div>
+                        <div class="cell">Fansubs</div>
+                        <div class="cell">Statut</div>
+                    </div>
+                    <div class="row">
+                        <div class="cell">{{auteur}}</div>
+                        [[($na)||<div class="cell">{{na}}</div>]]
+                        <div class="cell">{{annee}}</div>
+                        <div class="cell">{{type}}</div>
+                        <div class="cell">[[<a target="_blank" rel="nofollow" href="http://www.japscan.com/">]]{{fansub}}</a></div>
+                        <div class="cell">{{statut}}</div>
+                    </div>
+                </div>
+                <h2 class="bg-header">Synopsis</h2>
+                <div id="synopsis">
+                    {{synopsis}}</div>
+                <h2 class="bg-header">Liste Des Chapitres</h2>
+                <div id="liste_chapitres">
+                    {{*}}
+                </div>
+            </div>
+        </div>
+        {{*}}
+    </div>
+    </div>
+    {{*}}
 </body>
+
 </html>
