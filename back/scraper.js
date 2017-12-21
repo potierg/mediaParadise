@@ -5,7 +5,92 @@ module.exports = class Scraper {
     constructor() {
     }
 
-    static exec(HTMLContent = "", FileContent = "", callback) {
+    static exec(HTMLContent = "", callback) {
+        var html = HTMLContent.replace("\n", "");
+        var datas = this.parseHtml(this.clean_line(html.slice("<!DOCTYPE html>".length))).bal;
+
+        console.log("==>", JSON.stringify(datas));
+        callback(datas);
+        return (JSON.stringify(datas));
+    }
+
+    static parseHtml(html = "", loop = 0) {
+        let balises = {};
+        let indexHtml = 0;
+
+        while (html[0] != '<' && html.length > 0) {
+            html = html.slice(1);
+        }
+
+        if (html.length <= 0)
+            return null;
+
+        let ret = this.getBaliseInfo(html);
+        html = html.slice(ret.index + 1);
+
+        if (loop < 10) {
+            balises = ret.balise;
+
+            let ret_bal = this.parseHtml(html, loop + 1);
+            let next_balise = ret_bal.bal;
+
+            if (next_balise != undefined) {
+                if (ret_bal.end == false) {
+                    if (!balises[next_balise.name]) {
+                        balises[next_balise.name] = [];
+                    }
+                    balises[next_balise.name].push(next_balise);
+                }
+                else {
+                    if (!balises[next_balise.name]) {
+                        balises[next_balise.name] = [];
+                    }
+                    balises = next_balise;
+                }
+            }
+
+            if (ret.balise.is_end == false) {
+                return { bal: balises, end: false }
+            } else {
+                return { bal: balises, end: true }
+            }
+        }
+        return balises;
+    }
+
+    static getBaliseInfo(html) {
+        let start_balise = html.indexOf("<");
+        let end_balise = html.indexOf(" ");
+
+        let tmp_end2 = html.indexOf(">");
+        let tmp_end_balise_char = html.indexOf("/>");
+
+        let is_end = true;
+
+        if (tmp_end_balise_char > tmp_end2 || tmp_end_balise_char === -1) {
+            tmp_end_balise_char = tmp_end2;
+            is_end = false;
+        }
+
+        if (tmp_end_balise_char < end_balise || end_balise === -1)
+            end_balise = tmp_end_balise_char;
+
+        let balise_name = html.slice(start_balise + 1, end_balise);
+
+        if (['link'].indexOf(balise_name) !== -1)
+            is_end = true;
+
+        let content_line = html.slice(start_balise + 1 + balise_name.length, tmp_end_balise_char).trim();
+        let content = null;
+        if (content_line != "")
+            content = content_line.split(" ");
+
+        let new_balise = { name: balise_name, content: content, is_end: is_end };
+
+        return { index: tmp_end2, balise: new_balise };
+    }
+
+    /*static exec(HTMLContent = "", FileContent = "", callback) {
 
         var datas = { values: [] };
 
@@ -149,7 +234,7 @@ module.exports = class Scraper {
             ret_match.push(line);
         }
         return ret_match;
-    }
+    }*/
 
     static clean_line(line) {
         if (!line) return line;
